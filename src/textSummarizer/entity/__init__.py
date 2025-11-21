@@ -19,3 +19,10 @@ class DataTransformationConfig:
     root_dir: Path
     data_path: Path
     tokenizer_name: str
+
+@dataclass(frozen=True)
+class ModelTrainerConfig:
+    root_dir: Path
+    data_path: Path
+    model_ckpt: str
+    training_args: dict
