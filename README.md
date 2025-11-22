@@ -255,7 +255,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions or feedback, please open an issue or contact [Your Name] at [your.email@example.com]
+For questions or feedback, please open an issue or contact Harsh Goyal at harshgoyal2004@gmail.com
 ├── app.py                       # FastAPI application
 ├── Dockerfile                   # Container configuration
 ├── main.py                      # Main pipeline
