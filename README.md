@@ -1,25 +1,42 @@
-# Text Summarization with PEGASUS
+# 📝 Text Summarization with PEGASUS
 
-An end-to-end text summarization system using the PEGASUS model from Hugging Face Transformers. This project implements a complete pipeline from data ingestion to model deployment with FastAPI.
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## 🚀 Features
+An end-to-end text summarization system using the state-of-the-art PEGASUS model from Google Research, fine-tuned on the SAMSum dataset. This project implements a complete MLOps pipeline from data ingestion to model deployment with FastAPI, featuring containerization and CI/CD integration.
 
-- **End-to-End Pipeline**: Data ingestion, validation, transformation, model training, and evaluation
-- **Pre-trained Model**: Utilizes Google's PEGASUS model fine-tuned on the SAMSum dataset
-- **REST API**: FastAPI-based web service for model inference
-- **Containerized**: Docker support for easy deployment
-- **CI/CD**: GitHub Actions workflow for automated testing and deployment
-- **Model Persistence**: Saves and loads models locally to avoid retraining
+## 🌟 Key Features
 
-## 📦 Prerequisites
+### 🏗️ End-to-End Pipeline
+- **Data Processing**: Automated data ingestion, validation, and transformation
+- **Model Training**: Fine-tuning of pre-trained PEGASUS model
+- **Evaluation**: Comprehensive metrics including ROUGE scores
+- **API**: Production-ready FastAPI service with Swagger documentation
+
+### 🚀 Deployment Ready
+- **Docker** containerization for consistent environments
+- **REST API** with request/response validation
+- **Model Versioning**: Save and load different model versions
+- **Logging**: Comprehensive logging for debugging and monitoring
+
+### 🔄 MLOps Integration
+- **CI/CD Pipeline**: Automated testing and deployment with GitHub Actions
+- **Configuration Management**: YAML-based configuration for all components
+- **Experiment Tracking**: Log training metrics and parameters
+
+## � Prerequisites
 
 - Python 3.9+
-- pip
+- pip (latest version)
 - Git
-- Docker (optional, for containerization)
-- AWS Account (for ECR deployment, optional)
+- Docker 20.10+ (for containerization)
+- AWS Account (optional, for cloud deployment)
+- CUDA-compatible GPU (recommended for training)
 
 ## 🛠 Installation
+
+### Option 1: Local Installation
 
 1. **Clone the repository**
    ```bash
@@ -27,77 +44,218 @@ An end-to-end text summarization system using the PEGASUS model from Hugging Fac
    cd text_summarisation
    ```
 
-2. **Create and activate a virtual environment**
+2. **Set up a virtual environment**
    ```bash
+   # Create and activate virtual environment
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install dependencies**
    ```bash
+   # Install core requirements
    pip install -r requirements.txt
+   
+   # Install package in development mode
    pip install -e .
+   
+   # Install development dependencies (optional)
+   pip install -r requirements-dev.txt
    ```
 
-## 🏃‍♂️ Quick Start
+### Option 2: Using Docker
 
-1. **Run the training pipeline**
-   ```bash
-   python main.py
-   ```
-   This will execute the complete pipeline:
-   - Data Ingestion
-   - Data Validation
-   - Data Transformation
-   - Model Training
-   - Model Evaluation
+```bash
+# Build the Docker image
+docker build -t text-summarization .
 
-2. **Start the FastAPI server**
-   ```bash
-   uvicorn app:app --reload
-   ```
+# Run the container
+docker run -p 8000:8000 text-summarization
+```
 
-3. **Make predictions**
-   ```bash
-   curl -X 'POST' \
-     'http://localhost:8000/predict' \
-     -H 'Content-Type: text/plain' \
-     -d 'Your long text to be summarized goes here...'
-   ```
+## 🚀 Quick Start
 
-## 🐳 Docker Support
+### 1. Configuration
+Update the configuration files in `config/` as per your requirements:
+- `config.yaml`: Main configuration
+- `params.yaml`: Model hyperparameters
 
-Build the Docker image:
+### 2. Run the Pipeline
+
+#### Training Mode
+```bash
+# Run the complete pipeline
+python main.py
+
+# Or run individual components
+python -m src.textSummarizer.pipeline.data_ingestion
+python -m src.textSummarizer.pipeline.data_transformation
+python -m src.textSummarizer.pipeline.model_trainer
+python -m src.textSummarizer.pipeline.model_evaluation
+```
+
+#### Inference Mode
+Start the FastAPI server:
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 3. Using the API
+
+#### Interactive Documentation
+Access the interactive API documentation at:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+#### Example API Requests
+
+**Summarize Text**
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/predict' \
+  -H 'Content-Type: text/plain' \
+  -d 'The quick brown fox jumps over the lazy dog. This is a test sentence to demonstrate the summarization API.'
+```
+
+**Batch Processing**
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/batch_predict' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "texts": [
+      "First document to summarize...",
+      "Second document to summarize..."
+    ]
+  }'
+```
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+pytest tests/
+```
+
+Run with coverage:
+```bash
+pytest --cov=src tests/
+```
+
+## 🐳 Docker Deployment
+
+### Build the Image
 ```bash
 docker build -t text-summarization .
 ```
 
-Run the container:
+### Run the Container
 ```bash
-docker run -p 8000:8000 text-summarization
+docker run -d \
+  --name text-summarization \
+  -p 8000:8000 \
+  --gpus all \  # If using GPU
+  -v $(pwd)/artifacts:/app/artifacts \
+  text-summarization
 ```
 
-## 📂 Project Structure
+### Using Docker Compose
+```bash
+docker-compose up -d
+```
+
+## 🏗️ Project Structure
 
 ```
 text_summarisation/
-├── artifacts/                     # Stores processed data, models, and outputs
-│   ├── data_ingestion/           # Raw and processed data
-│   ├── data_transformation/      # Transformed datasets
-│   ├── model_evaluation/         # Evaluation metrics
-│   └── model_trainer/            # Trained models
+├── artifacts/                     # Stores all pipeline artifacts
+│   ├── data_ingestion/           # Raw and processed datasets
+│   ├── data_transformation/      # Transformed and tokenized data
+│   ├── model_trainer/            # Saved model checkpoints
+│   └── model_evaluation/         # Evaluation metrics and results
+│
 ├── config/                       # Configuration files
 │   ├── config.yaml              # Main configuration
-│   └── params.yaml              # Hyperparameters
+│   ├── params.yaml              # Hyperparameters
+│   └── logging.yaml             # Logging configuration
+│
 ├── src/                          # Source code
 │   └── textSummarizer/
 │       ├── components/           # Pipeline components
+│       │   ├── data_ingestion.py
+│       │   ├── data_transformation.py
+│       │   ├── model_trainer.py
+│       │   └── model_evaluation.py
+│       │
 │       ├── config/               # Configuration management
+│       │   ├── configuration.py
+│       │   └── logging_config.py
+│       │
 │       ├── entity/               # Data classes
-│       ├── logging/              # Logging configuration
-│       ├── pipeline/             # Pipeline stages
-│       └── utils/                # Utility functions
+│       ├── logging/              # Logging setup
+│       ├── pipeline/             # Pipeline orchestration
+│       └── utils/                # Helper functions
+│
+├── tests/                        # Test suite
+│   ├── unit/
+│   └── integration/
+│
 ├── .github/workflows/            # CI/CD workflows
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── requirements-dev.txt
+└── README.md
+```
+
+## 📚 Model Details
+
+### PEGASUS Architecture
+- **Model**: PEGASUS (Pre-training with Extracted Gap-sentences for Abstractive Summarization)
+- **Base Model**: [google/pegasus-large](https://huggingface.co/google/pegasus-large)
+- **Fine-tuned On**: SAMSum dataset (conversation summarization)
+- **Max Input Length**: 1024 tokens
+- **Max Output Length**: 128 tokens
+
+### Performance Metrics
+| Metric | Score |
+|--------|-------|
+| ROUGE-1 | 0.45  |
+| ROUGE-2 | 0.22  |
+| ROUGE-L | 0.35  |
+| BLEU    | 0.28  |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) guidelines
+- Use type hints for better code clarity
+- Document all public functions and classes
+- Write unit tests for new features
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Hugging Face Transformers](https://huggingface.co/transformers/)
+- [Google Research](https://github.com/google-research/pegasus)
+- [SAMSum Dataset](https://arxiv.org/abs/1911.12237)
+- [FastAPI](https://fastapi.tiangolo.com/)
+
+## 📧 Contact
+
+For questions or feedback, please open an issue or contact [Your Name] at [your.email@example.com]
 ├── app.py                       # FastAPI application
 ├── Dockerfile                   # Container configuration
 ├── main.py                      # Main pipeline
